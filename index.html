@@ -1,0 +1,1672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#080b1b">
+<title>Orbitly — Your knowledge, in orbit</title>
+<style>
+:root {
+  color-scheme: dark;
+  --bg:#080b1b; --panel:rgba(15,20,43,.82);
+  --line:rgba(166,186,255,.16); --text:#edf3ff; --muted:#9baac6;
+  --cyan:#67e8f9; --violet:#b49aff; --pink:#fa83c9; --orange:#ffae70;
+}
+* { box-sizing:border-box }
+html,body { margin:0; width:100%; height:100%; overflow:hidden }
+body {
+  background:var(--bg); color:var(--text);
+  font:15px/1.5 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+}
+button,input,select,textarea { font:inherit }
+button,a,input,select,textarea { -webkit-tap-highlight-color:transparent }
+button,a { touch-action:manipulation }
+button {
+  cursor:pointer; color:var(--text); border:1px solid var(--line);
+  border-radius:14px; padding:11px 15px; min-height:46px;
+  background:rgba(150,169,255,.08);
+  transition:transform .18s,background .18s,border-color .18s;
+}
+button:hover { background:rgba(150,169,255,.17); border-color:#7287ba }
+button:active { transform:scale(.96) }
+button:disabled { opacity:.4; cursor:not-allowed }
+button:focus-visible,a:focus-visible,input:focus-visible,
+select:focus-visible,textarea:focus-visible {
+  outline:2px solid var(--cyan); outline-offset:3px;
+}
+button.primary {
+  color:#091426; font-weight:750; border:0;
+  background:linear-gradient(115deg,var(--cyan),#ac9aff);
+  box-shadow:0 5px 25px #67e8f920;
+}
+button.danger { color:#ffadb4; border-color:#ff798144 }
+a { color:var(--cyan) }
+h1,h2,h3,p { margin:0 0 12px }
+h1 { font-size:clamp(28px,5vw,44px); letter-spacing:-1.5px; line-height:1.12 }
+h2 { font-size:24px; letter-spacing:-.7px }
+h3 { font-size:16px }
+small,.muted { color:var(--muted) }
+small { font-size:12px }
+[hidden] { display:none!important }
+#universe {
+  position:fixed; inset:0;
+  background:
+    radial-gradient(ellipse at 20% 25%,#54215b55,transparent 48%),
+    radial-gradient(ellipse at 78% 65%,#15466460,transparent 52%),
+    radial-gradient(ellipse at 60% 15%,#29235166,transparent 50%),#050817;
+}
+#space { display:block; width:100%; height:100%; touch-action:none }
+.vignette {
+  position:fixed; inset:0; pointer-events:none;
+  background:radial-gradient(ellipse at center,transparent 25%,#05071388);
+}
+.glass {
+  background:var(--panel); border:1px solid var(--line);
+  backdrop-filter:blur(22px); -webkit-backdrop-filter:blur(22px);
+  box-shadow:0 18px 65px #0004,inset 0 1px 0 #ffffff06;
+  border-radius:23px;
+}
+header {
+  position:fixed; z-index:3;
+  top:calc(12px + env(safe-area-inset-top)); left:16px; right:16px;
+  display:flex; justify-content:space-between; align-items:center;
+  pointer-events:none;
+}
+header>* { pointer-events:auto }
+.brand {
+  display:flex; align-items:center; gap:10px; border:0;
+  background:transparent; padding:0; font-size:23px; font-weight:800;
+  letter-spacing:-1px;
+}
+.brand-mark {
+  width:34px; height:34px; display:grid; place-items:center;
+  border:1px solid #a998ff88; border-radius:50%;
+  color:var(--cyan); box-shadow:0 0 25px #a28fff33;
+  transform:rotate(-25deg); font-size:27px;
+}
+.header-actions { display:flex; gap:8px; align-items:center }
+.header-pill { padding:7px 12px; border-radius:30px; font-size:12px }
+#settingsButton { padding:9px 13px; background:var(--panel) }
+main {
+  position:fixed; inset:calc(77px + env(safe-area-inset-top)) 0
+    calc(96px + env(safe-area-inset-bottom));
+  pointer-events:none;
+}
+.page { height:100%; animation:enter .25s ease-out }
+.page:not(.orbit-page) {
+  overflow:auto; padding:10px 16px 24px; pointer-events:auto;
+  scrollbar-width:thin;
+}
+.page-inner { max-width:920px; margin:auto }
+.page-heading { margin-bottom:20px }
+.page-heading p { color:var(--muted); max-width:520px }
+.orbit-intro { margin:10px 22px; max-width:480px; pointer-events:none }
+.eyebrow { text-transform:uppercase; letter-spacing:2.5px; font-size:10px; color:var(--cyan) }
+.orbit-intro p { color:#a8b6cf; font-size:13px; max-width:310px }
+.orbit-actions { display:flex; gap:8px; pointer-events:auto; margin-top:14px }
+.orbit-actions button { background:rgba(12,19,40,.75) }
+#orbitLibrary {
+  position:absolute; bottom:0; left:16px; right:16px;
+  max-height:44%; display:flex; flex-direction:column;
+  padding:15px; pointer-events:auto;
+}
+.library-head { display:flex; align-items:center; gap:10px; justify-content:space-between }
+.library-head h3 { margin:0 }
+#filterArea { padding-top:12px }
+.search { width:100%; margin-bottom:8px }
+.filters { display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px }
+.filters select { min-width:0; padding:9px 6px; font-size:12px }
+input,select,textarea {
+  border:1px solid var(--line); border-radius:12px;
+  color:var(--text); background:#090f24cc;
+  padding:11px 12px; min-height:46px; width:100%;
+}
+textarea { resize:vertical; min-height:96px }
+select option { background:#11182e }
+#problemList { overflow:auto; margin-top:10px; scrollbar-width:thin }
+.problem-row {
+  display:flex; width:100%; align-items:center; gap:11px;
+  border:0; border-radius:12px; padding:10px; min-height:62px;
+  text-align:left; background:transparent;
+}
+.problem-row+.problem-row { border-top:1px solid #ffffff08 }
+.dot { flex:none; width:12px; height:12px; border-radius:50%; background:var(--dot); box-shadow:0 0 14px var(--dot) }
+.row-content { min-width:0; flex:1 }
+.row-title { display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-weight:650 }
+.row-meta { display:block; font-size:11px; color:var(--muted); margin-top:3px }
+.pill { display:inline-block; font-size:10px; padding:3px 8px; border-radius:20px; background:#ffffff0b; white-space:nowrap }
+.pill.due { color:#ffb28c; background:#ff794b19 }
+.pill.mastered { color:#7fe8c4; background:#4febb315 }
+.empty { text-align:center; padding:24px 12px; color:var(--muted) }
+.empty h3 { color:var(--text) }
+.empty button { margin-top:8px }
+.queue { display:grid; gap:12px }
+.queue-card { padding:19px; display:flex; gap:16px; align-items:center }
+.queue-card .row-title { white-space:normal }
+.queue-card .row-content { flex:1 }
+.queue-card button { flex-shrink:0 }
+.section-card { padding:22px; margin-bottom:16px }
+.form-grid { display:grid; grid-template-columns:1fr 1fr; gap:15px }
+.field { display:block; margin-bottom:15px }
+.field>span { display:block; font-size:12px; font-weight:650; margin-bottom:7px; color:#c1cde4 }
+.form-grid .field { margin:0 }
+.form-actions { display:flex; gap:10px; align-items:center; margin-top:20px }
+.form-actions .primary { flex:1 }
+.stat-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin-bottom:16px }
+.stat { padding:20px }
+.stat strong { display:block; font-size:33px; letter-spacing:-1px; color:var(--cyan) }
+.stat span { color:var(--muted); font-size:12px }
+.topic-row { margin:16px 0 }
+.topic-line { display:flex; justify-content:space-between; font-size:12px; gap:12px }
+.bar { height:6px; border-radius:8px; background:#ffffff0a; margin-top:7px; overflow:hidden }
+.bar>i { display:block; height:100%; border-radius:8px; background:var(--dot) }
+.heatmap {
+  display:grid; grid-template-rows:repeat(7,1fr);
+  grid-auto-flow:column; grid-auto-columns:1fr; gap:5px; margin-top:18px;
+}
+.heat-cell { aspect-ratio:1; border-radius:4px; min-width:0; background:#ffffff08; border:1px solid #ffffff05 }
+.heat-cell[data-level="1"] { background:#28616a }
+.heat-cell[data-level="2"] { background:#348e99 }
+.heat-cell[data-level="3"] { background:#59bcc6 }
+.heat-cell[data-level="4"] { background:#91edf0; box-shadow:0 0 8px #67e8f922 }
+.heat-legend { display:flex; align-items:center; gap:5px; justify-content:flex-end; margin-top:12px; font-size:10px; color:var(--muted) }
+.heat-legend i { width:11px; height:11px; border-radius:2px }
+nav {
+  position:fixed; z-index:5; bottom:calc(12px + env(safe-area-inset-bottom));
+  left:16px; right:16px; max-width:520px; margin:auto;
+  display:grid; grid-template-columns:repeat(5,1fr); padding:7px;
+  border-radius:24px;
+}
+nav button {
+  border:0; background:transparent; min-height:59px; padding:6px 2px; min-width:0;
+  display:flex; flex-direction:column; align-items:center;
+  justify-content:center; gap:2px; color:var(--muted); font-size:10px;
+}
+nav button .nav-icon { font-size:20px; line-height:1.3 }
+nav button[aria-current="page"] {
+  color:var(--cyan); background:linear-gradient(135deg,#67e8f91a,#a28fff15);
+}
+#todayBadge { font-size:10px; margin-left:3px; color:var(--orange) }
+dialog {
+  color:var(--text); width:calc(100% - 24px); max-width:570px;
+  max-height:calc(100dvh - 44px); padding:0; overflow:auto;
+  background:rgba(13,19,39,.97); border:1px solid #a7b7ff30;
+  border-radius:25px; box-shadow:0 30px 100px #000a;
+}
+dialog::backdrop { background:#03061199; backdrop-filter:blur(7px) }
+.modal-head { display:flex; align-items:flex-start; gap:15px; justify-content:space-between; padding:22px 22px 0 }
+.modal-head h2 { margin:0; overflow-wrap:anywhere; font-size:23px }
+.close-button { flex-shrink:0; padding:6px; min-width:44px; background:transparent }
+.modal-body { padding:18px 22px 24px }
+.detail-meta { display:flex; gap:7px; flex-wrap:wrap; margin-bottom:15px }
+.detail-meta .pill { font-size:11px }
+.detail-actions { display:flex; gap:8px; flex-wrap:wrap; margin:18px 0 0 }
+.detail-actions button { font-size:12px }
+.note-block { margin-top:16px }
+.note-block h3 { margin-bottom:5px; color:#b2c3e1; font-size:12px }
+.note-block p { white-space:pre-wrap; overflow-wrap:anywhere; font-size:13px }
+#revealButton { width:100%; padding:20px; border-style:dashed; color:var(--cyan) }
+.rating-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:7px; margin-top:18px }
+.rating-grid button { padding:12px 3px; font-size:12px }
+.rating-grid small { display:block; font-size:10px; margin-top:4px; color:inherit; opacity:.7 }
+.rating-grid button:nth-child(1) { color:#ff9caa; border-color:#ff7c8e44 }
+.rating-grid button:nth-child(2) { color:#ffc084; border-color:#ffb75c44 }
+.rating-grid button:nth-child(3) { color:var(--cyan); border-color:#67e8f944 }
+.rating-grid button:nth-child(4) { color:var(--violet); border-color:#b49aff44 }
+.review-hint { margin:12px 0 0; font-size:11px; color:var(--muted) }
+.history { padding-left:18px; color:var(--muted); font-size:12px; max-height:170px; overflow:auto }
+.setting-row { display:flex; align-items:center; gap:15px; justify-content:space-between; margin-bottom:22px }
+.setting-row label { flex:1 }
+.setting-row input { width:24px; height:24px; min-height:24px; accent-color:var(--cyan) }
+.settings-buttons { display:flex; flex-wrap:wrap; gap:9px }
+#storageWarning {
+  position:fixed; z-index:8; top:calc(69px + env(safe-area-inset-top));
+  left:16px; right:16px; text-align:center; font-size:12px;
+  color:#ffd9b1; background:#462814f0; padding:8px; border-radius:10px;
+}
+#toast {
+  position:fixed; z-index:30; bottom:calc(108px + env(safe-area-inset-bottom));
+  left:50%; transform:translate(-50%,12px); width:max-content;
+  max-width:calc(100% - 32px); padding:12px 18px; text-align:center;
+  border-radius:15px; background:#17243cf5; border:1px solid #77dced55;
+  box-shadow:0 10px 40px #0006; opacity:0; pointer-events:none;
+  transition:opacity .2s,transform .2s; font-size:13px;
+}
+#toast.show { opacity:1; transform:translate(-50%,0) }
+#sceneError {
+  position:fixed; top:43%; left:50%; transform:translate(-50%,-50%);
+  max-width:300px; color:var(--muted); text-align:center; font-size:12px;
+}
+
+/* ---------- First-launch welcome card (Orbit screen) ---------- */
+.welcome {
+  margin:10px 16px 0; padding:14px 16px; max-width:480px;
+  display:flex; flex-direction:column; gap:10px; pointer-events:auto;
+  animation:enter .25s ease-out;
+}
+.welcome strong { display:block; margin-bottom:2px }
+.welcome p { margin:0; font-size:13px; color:#a8b6cf }
+.welcome-actions { display:flex; gap:8px }
+.welcome-actions button { flex:1; min-height:44px; padding:8px 12px; font-size:13px }
+
+/* ---------- About page ---------- */
+.tagline {
+  font-size:20px; font-weight:700; line-height:1.3; letter-spacing:-.3px;
+  background:linear-gradient(110deg,var(--cyan),var(--violet),var(--pink));
+  -webkit-background-clip:text; background-clip:text;
+  color:transparent!important; -webkit-text-fill-color:transparent;
+}
+.page-heading p.tagline { color:transparent }
+.about-card h3 { font-size:18px; margin-bottom:6px }
+.about-card p { color:#c1cde4; font-size:14px }
+.steps { list-style:none; padding:0; margin:14px 0 0; counter-reset:step; display:grid; gap:14px }
+.steps li { counter-increment:step; display:flex; gap:14px; align-items:flex-start; color:#c1cde4; font-size:14px }
+.steps li::before {
+  content:counter(step); flex:none; width:32px; height:32px; display:grid; place-items:center;
+  border-radius:50%; font-weight:800; color:#091426;
+  background:linear-gradient(115deg,var(--cyan),#ac9aff);
+}
+.steps li div { min-width:0 }
+.steps strong { display:block; color:var(--text) }
+.legend-item { display:flex; gap:14px; align-items:center; padding:12px 0; color:#c1cde4; font-size:14px }
+.legend-item+.legend-item { border-top:1px solid #ffffff0d }
+.legend-item strong { display:block; color:var(--text) }
+.legend-item div { min-width:0 }
+.legend-visual { flex:none; width:64px; height:40px; display:flex; align-items:center; justify-content:center; gap:5px }
+.legend-visual i { display:block; border-radius:50%; background:var(--cyan); box-shadow:0 0 10px #67e8f966 }
+.mini-orbit {
+  position:relative; width:38px; height:38px; border:1px solid #a6baff55;
+  border-radius:50%; display:grid; place-items:center;
+}
+.mini-orbit::before { content:""; position:absolute; inset:8px; border:1px solid #a6baff40; border-radius:50% }
+.mini-orbit i { width:8px; height:8px; background:var(--orange); box-shadow:0 0 8px var(--orange) }
+.glow-dot { width:14px!important; height:14px!important; background:#ff783e!important; box-shadow:0 0 0 5px #ff783e33,0 0 18px #ff783e!important; animation:pulse 2s ease-in-out infinite }
+.swatches { display:grid; grid-template-columns:repeat(auto-fill,minmax(125px,1fr)); gap:8px; margin-top:12px }
+.swatch { display:flex; align-items:center; gap:9px; font-size:12px; color:#c1cde4; padding:8px 10px; border-radius:12px; background:#ffffff08 }
+.swatch i { flex:none; width:12px; height:12px; border-radius:50% }
+.rating-row { display:flex; gap:12px; align-items:baseline; padding:9px 0; font-size:14px; color:#c1cde4 }
+.rating-row+.rating-row { border-top:1px solid #ffffff0d }
+.rating-name { flex:none; width:58px; font-weight:750 }
+.r-forgot { color:#ff9caa } .r-hard { color:#ffc084 } .r-good { color:var(--cyan) } .r-easy { color:var(--violet) }
+.ladder { display:flex; gap:5px; margin:16px 0 8px }
+.ladder .rung {
+  --a:.06; flex:1; min-width:0; text-align:center; padding:9px 0; border-radius:12px;
+  border:1px solid #67e8f933; background:rgba(103,232,249,var(--a));
+}
+.ladder .rung b { display:block; font-size:17px; line-height:1.2; color:var(--cyan) }
+.ladder .rung small { font-size:9px }
+.about-list { margin:10px 0 0; padding-left:20px; color:#c1cde4; font-size:14px }
+.about-list li { margin-bottom:8px }
+.about-cta { text-align:center; padding:6px 0 18px }
+.about-cta button { padding:14px 26px }
+
+@keyframes enter { from { opacity:0; transform:translateY(9px) } to { opacity:1; transform:none } }
+@keyframes pulse { 0%,100% { transform:scale(1) } 50% { transform:scale(1.25) } }
+body.reduced *,body.reduced *::before,body.reduced *::after {
+  animation:none!important; transition:none!important; scroll-behavior:auto!important;
+}
+@media(min-width:760px) {
+  header { left:30px; right:30px }
+  .orbit-intro { margin:20px 34px }
+  .welcome { margin:20px 34px 0 }
+  #orbitLibrary { left:30px; right:auto; width:350px; max-height:52%; padding:18px }
+  .page:not(.orbit-page) { padding:20px 30px 35px }
+  .stat-grid { grid-template-columns:repeat(4,1fr) }
+  .heatmap { gap:8px }
+  nav { bottom:calc(18px + env(safe-area-inset-bottom)) }
+}
+/* While the welcome card is showing on phones, keep only the action buttons of the intro so nothing collides with the library panel. */
+@media(max-width:759px) {
+  .has-welcome .orbit-intro .eyebrow,
+  .has-welcome .orbit-intro h1,
+  .has-welcome .orbit-intro p { display:none }
+  .has-welcome .orbit-actions { margin-top:10px }
+}
+@media(max-width:400px) {
+  nav { padding:5px }
+  nav button { padding:6px 1px }
+}
+@media(max-width:370px) {
+  nav { left:10px; right:10px }
+  .header-pill { display:none }
+  .orbit-intro { margin-top:5px }
+  .orbit-intro h1 { font-size:28px }
+  .orbit-intro p { display:none }
+  .queue-card { padding:14px; gap:8px }
+  .rating-grid { gap:4px }
+  .rating-grid button { font-size:11px }
+  .section-card { padding:18px }
+  .legend-visual { width:52px }
+}
+</style>
+</head>
+<body>
+<div id="universe"><canvas id="space" aria-label="Interactive problem solar system. Drag to rotate, pinch or scroll to zoom. Use the problem list for keyboard access."></canvas></div>
+<div class="vignette"></div>
+<div id="sceneError" hidden>3D is unavailable. Your library, reviews, and backups still work below.</div>
+
+<header>
+  <button class="brand" id="brandButton" aria-label="Orbitly home">
+    <span class="brand-mark" aria-hidden="true">◎</span> Orbitly
+  </button>
+  <div class="header-actions">
+    <span class="glass header-pill" id="streakPill">0 day streak</span>
+    <button id="settingsButton" aria-label="Open settings and backups">⚙ <span>Settings</span></button>
+  </div>
+</header>
+
+<div id="storageWarning" role="status" hidden></div>
+
+<main>
+  <section id="orbitPage" class="page orbit-page" aria-label="Orbit">
+    <div id="welcomeCard" class="glass welcome" role="region" aria-label="Welcome to Orbitly" hidden>
+      <div>
+        <strong>Welcome to Orbitly ✨</strong>
+        <p>Log the DSA problems you solve, then review each one as its planet glows orange.</p>
+      </div>
+      <div class="welcome-actions">
+        <button class="primary" data-action="about">How it works</button>
+        <button id="welcomeDismiss" aria-label="Dismiss welcome message">Dismiss</button>
+      </div>
+    </div>
+    <div class="orbit-intro">
+      <div class="eyebrow">Your knowledge, in orbit</div>
+      <h1>Make it<br>unforgettable.</h1>
+      <p>Near the sun? Time to revisit. Review a planet and send it deeper into your memory.</p>
+      <div class="orbit-actions">
+        <button id="startReview">Review <span id="dueCount">0</span> due</button>
+        <button id="resetCamera" aria-label="Reset camera view">Recenter</button>
+      </div>
+    </div>
+    <div id="orbitLibrary" class="glass">
+      <div class="library-head">
+        <h3>Problem constellation <small id="libraryCount"></small></h3>
+        <button id="filterToggle" aria-expanded="false" aria-controls="filterArea">Filter</button>
+      </div>
+      <div id="filterArea" hidden>
+        <input id="search" class="search" type="search" placeholder="Search titles or notes…" aria-label="Search problems">
+        <div class="filters">
+          <select id="topicFilter" aria-label="Filter by topic"><option value="">All topics</option></select>
+          <select id="difficultyFilter" aria-label="Filter by difficulty">
+            <option value="">Difficulty</option><option>Easy</option><option>Medium</option><option>Hard</option>
+          </select>
+          <select id="statusFilter" aria-label="Filter by status">
+            <option value="">All statuses</option><option value="due">Due</option>
+            <option value="learning">Learning</option><option value="mastered">Mastered</option>
+          </select>
+        </div>
+      </div>
+      <div id="problemList"></div>
+    </div>
+  </section>
+
+  <section id="todayPage" class="page" aria-labelledby="todayTitle" hidden>
+    <div class="page-inner">
+      <div class="page-heading">
+        <div class="eyebrow">One small review. One stronger connection.</div>
+        <h1 id="todayTitle">Today's gravity.</h1>
+        <p id="queueSummary"></p>
+      </div>
+      <div id="todayQueue" class="queue"></div>
+    </div>
+  </section>
+
+  <section id="addPage" class="page" aria-labelledby="formTitle" hidden>
+    <div class="page-inner" style="max-width:680px">
+      <div class="page-heading">
+        <div class="eyebrow">Expand your universe</div>
+        <h1 id="formTitle">Launch a problem.</h1>
+        <p>Capture what clicked—and what tripped you up. Your first revision is tomorrow.</p>
+      </div>
+      <form id="problemForm" class="glass section-card">
+        <input type="hidden" id="editId">
+        <label class="field"><span>Problem title *</span>
+          <input id="titleInput" required maxlength="180" placeholder="e.g. Longest Substring Without Repeating Characters">
+        </label>
+        <label class="field"><span>Problem link</span>
+          <input id="linkInput" type="url" maxlength="2000" placeholder="https://leetcode.com/problems/…">
+        </label>
+        <div class="form-grid">
+          <label class="field"><span>Topic</span><select id="topicInput"></select></label>
+          <label class="field"><span>Difficulty</span>
+            <select id="difficultyInput"><option>Easy</option><option selected>Medium</option><option>Hard</option></select>
+          </label>
+        </div>
+        <label class="field" style="margin-top:15px"><span>Approach / key insight</span>
+          <textarea id="approachInput" maxlength="20000" placeholder="Explain the idea in your own words…"></textarea>
+        </label>
+        <div class="form-grid">
+          <label class="field"><span>Time complexity</span><input id="timeInput" maxlength="300" placeholder="O(n)"></label>
+          <label class="field"><span>Space complexity</span><input id="spaceInput" maxlength="300" placeholder="O(n)"></label>
+        </div>
+        <label class="field" style="margin-top:15px"><span>Mistakes / watch-outs</span>
+          <textarea id="mistakesInput" maxlength="20000" placeholder="Edge cases, wrong turns, off-by-one errors…"></textarea>
+        </label>
+        <div class="form-actions">
+          <button type="button" id="cancelEdit" hidden>Cancel</button>
+          <button type="submit" class="primary" id="saveProblem">Launch into orbit</button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <section id="statsPage" class="page" aria-labelledby="statsTitle" hidden>
+    <div class="page-inner">
+      <div class="page-heading">
+        <div class="eyebrow">Small steps. Stellar progress.</div>
+        <h1 id="statsTitle">Mission control.</h1>
+        <p>A study day means logging a problem or completing a review. Topic strength reflects recall and review spacing.</p>
+      </div>
+      <div id="statCards" class="stat-grid"></div>
+      <div class="glass section-card">
+        <h3>12-week activity</h3>
+        <small id="heatmapRange"></small>
+        <div id="heatmap" class="heatmap" role="list" aria-label="Daily activity for the last 12 weeks, Monday to Sunday"></div>
+        <div class="heat-legend">Less <i style="background:#ffffff08"></i><i style="background:#28616a"></i><i style="background:#348e99"></i><i style="background:#59bcc6"></i><i style="background:#91edf0"></i> More</div>
+      </div>
+      <div class="glass section-card">
+        <h3>Topic signals</h3>
+        <small>Forgotten or overdue problems reduce strength. Mastered = a 30+ day interval and not due.</small>
+        <div id="topicStats"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="aboutPage" class="page" aria-labelledby="aboutTitle" hidden>
+    <div class="page-inner" style="max-width:680px">
+      <div class="page-heading">
+        <div class="eyebrow">About</div>
+        <h1 id="aboutTitle">Orbitly</h1>
+        <p class="tagline">Solve it once. Watch it come back around.</p>
+        <p>Most people solve a DSA problem, feel great, and forget the approach within weeks. Orbitly brings each one back just before it fades.</p>
+      </div>
+
+      <div class="glass section-card about-card">
+        <h3>How it works</h3>
+        <ol class="steps" role="list">
+          <li><div><strong>Solve a problem anywhere</strong>LeetCode, a book, a contest. It all counts.</div></li>
+          <li><div><strong>Log it in Orbitly</strong>Save your approach, time and space complexity, and the mistakes you made.</div></li>
+          <li><div><strong>Review it when its planet glows orange</strong>Try to recall the approach, reveal your notes, then rate how well you remembered.</div></li>
+        </ol>
+      </div>
+
+      <div class="glass section-card about-card">
+        <h3>Reading the universe</h3>
+        <div class="legend-item">
+          <span class="legend-visual" aria-hidden="true"><i style="width:9px;height:9px"></i><i style="width:14px;height:14px"></i><i style="width:21px;height:21px"></i></span>
+          <div><strong>Planet size is difficulty</strong>Small is Easy, medium is Medium, large is Hard. Hard planets also wear a ring.</div>
+        </div>
+        <div class="legend-item">
+          <span class="legend-visual" aria-hidden="true"><i style="width:13px;height:13px;background:#67e8f9"></i><i style="width:13px;height:13px;background:#fa83c9;box-shadow:0 0 10px #fa83c966"></i><i style="width:13px;height:13px;background:#ffcf7d;box-shadow:0 0 10px #ffcf7d66"></i></span>
+          <div><strong>Planet color is topic</strong>Every topic has its own color, listed below.</div>
+        </div>
+        <div class="legend-item">
+          <span class="legend-visual" aria-hidden="true"><span class="mini-orbit"><i></i></span></span>
+          <div><strong>Orbit distance is how soon it's due</strong>The closer to the sun, the sooner you should review it. Far orbits mean a well-memorized problem.</div>
+        </div>
+        <div class="legend-item">
+          <span class="legend-visual" aria-hidden="true"><i class="glow-dot"></i></span>
+          <div><strong>Orange glow means due now</strong>A pulsing orange halo marks a problem that is due today or overdue.</div>
+        </div>
+        <small>Topic colors</small>
+        <div id="topicSwatches" class="swatches"></div>
+      </div>
+
+      <div class="glass section-card about-card">
+        <h3>Your review ratings</h3>
+        <p>After revealing your notes, rate how well you remembered.</p>
+        <div class="rating-row"><span class="rating-name r-forgot">Forgot</span><span>Back to the start. You'll see it again tomorrow.</span></div>
+        <div class="rating-row"><span class="rating-name r-hard">Hard</span><span>You got there, but it was a struggle. The next gap shrinks to about 60% of the current one.</span></div>
+        <div class="rating-row"><span class="rating-name r-good">Good</span><span>Right on schedule. The problem moves up one rung of the ladder.</span></div>
+        <div class="rating-row"><span class="rating-name r-easy">Easy</span><span>Effortless. It jumps ahead, with a gap about 40% longer than usual.</span></div>
+        <div class="ladder" role="img" aria-label="Review ladder: 1, 3, 7, 14, 30, then 60 days">
+          <div class="rung" style="--a:.06"><b>1</b><small>day</small></div>
+          <div class="rung" style="--a:.10"><b>3</b><small>days</small></div>
+          <div class="rung" style="--a:.14"><b>7</b><small>days</small></div>
+          <div class="rung" style="--a:.19"><b>14</b><small>days</small></div>
+          <div class="rung" style="--a:.25"><b>30</b><small>days</small></div>
+          <div class="rung" style="--a:.32"><b>60</b><small>days</small></div>
+        </div>
+        <small>Each Good rating moves a problem one rung to the right. Past 60 days, the gaps keep growing.</small>
+      </div>
+
+      <div class="glass section-card about-card">
+        <h3>Your data</h3>
+        <p>Everything is stored only in this browser. Nothing is uploaded anywhere. To back up or move to another device, open Settings (the ⚙ button at the top), choose <strong>Export JSON</strong>, then use Import JSON on the other device. Clearing your browser data erases your library, so export now and then.</p>
+      </div>
+
+      <div class="glass section-card about-card">
+        <h3>Tips</h3>
+        <ul class="about-list">
+          <li><strong>Review daily.</strong> A few minutes each day beats a long session once a week.</li>
+          <li><strong>Write notes in your own words.</strong> If you can explain it simply, you understand it.</li>
+          <li><strong>Add the mistake you made.</strong> Your past errors are the best hints for next time.</li>
+        </ul>
+      </div>
+
+      <div class="about-cta"><button class="primary" data-action="add">Add your first problem</button></div>
+    </div>
+  </section>
+</main>
+
+<nav class="glass" aria-label="Main navigation">
+  <button data-page="orbit" aria-current="page"><span class="nav-icon" aria-hidden="true">◎</span><span>Orbit</span></button>
+  <button data-page="today"><span class="nav-icon" aria-hidden="true">◷</span><span>Today <b id="todayBadge"></b></span></button>
+  <button data-page="add"><span class="nav-icon" aria-hidden="true">＋</span><span>Add</span></button>
+  <button data-page="stats"><span class="nav-icon" aria-hidden="true">▥</span><span>Stats</span></button>
+  <button data-page="about"><span class="nav-icon" aria-hidden="true">ⓘ</span><span>About</span></button>
+</nav>
+
+<dialog id="problemDialog" aria-labelledby="detailTitle">
+  <div class="modal-head"><h2 id="detailTitle"></h2><button class="close-button" data-close="problemDialog" aria-label="Close problem">✕</button></div>
+  <div id="detailBody" class="modal-body"></div>
+</dialog>
+
+<dialog id="settingsDialog" aria-labelledby="settingsTitle">
+  <div class="modal-head"><h2 id="settingsTitle">Flight settings</h2><button class="close-button" data-close="settingsDialog" aria-label="Close settings">✕</button></div>
+  <div class="modal-body">
+    <div class="setting-row">
+      <label for="reducedMotion"><strong>Reduced motion</strong><br><small>Freeze orbit animation and disable camera flights, particles, and fireworks.</small></label>
+      <input type="checkbox" id="reducedMotion">
+    </div>
+    <h3>Your data, your universe</h3>
+    <p class="muted" style="font-size:13px">Stored in this browser only. Export regularly. Import replaces the current library after confirmation.</p>
+    <div class="settings-buttons">
+      <button id="exportButton">Export JSON</button>
+      <button id="importButton">Import JSON</button>
+      <button id="clearSamples" class="danger">Clear sample data</button>
+    </div>
+    <input type="file" id="importFile" accept=".json,application/json" hidden>
+    <p id="sampleInfo" class="muted" style="font-size:12px;margin-top:18px"></p>
+    <hr style="border:0;border-top:1px solid var(--line);margin:22px 0">
+    <small>Drag empty space to rotate · Pinch or scroll to zoom · Tap a planet to review.<br>Planet size = difficulty. Color = topic. Orange halo = due.</small>
+  </div>
+</dialog>
+
+<div id="toast" role="status" aria-live="polite"></div>
+
+<!-- Pinned, classic build: no other external dependencies. -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js"></script>
+<script>
+"use strict";
+
+/* ---------- Shared constants and local-calendar date helpers ---------- */
+const $ = id => document.getElementById(id);
+const TOPICS = ["Arrays","Strings","Trees","Graphs","DP","Heap","Binary Search","Linked List","Stack/Queue","Backtracking","Other"];
+const COLORS = {
+  Arrays:"#67e8f9", Strings:"#fa83c9", Trees:"#79e4ad", Graphs:"#ad9aff",
+  DP:"#ffcf7d", Heap:"#ff976f", "Binary Search":"#7d9fff",
+  "Linked List":"#64d9be", "Stack/Queue":"#e99dff", Backtracking:"#ee7cab", Other:"#b4c3df"
+};
+const DAY = 86400000;
+const KEY = "orbitly.data.v1";
+const WELCOME_KEY = "orbitly.welcomeDismissed.v1";
+const esc = value => String(value ?? "").replace(/[&<>"']/g, c => ({
+  "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+}[c]));
+function dayKey(value = new Date()) {
+  const d = new Date(value);
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+}
+function dayNumber(value) {
+  const [y,m,d] = dayKey(value).split("-").map(Number);
+  return Math.floor(Date.UTC(y,m-1,d)/DAY);
+}
+function calendarDate(key) {
+  const [y,m,d] = key.split("-").map(Number);
+  return new Date(y,m-1,d,12);
+}
+function shiftDay(value, days) {
+  const d = new Date(value);
+  d.setDate(d.getDate()+days);
+  return d;
+}
+function nextDate(days, now = new Date()) {
+  const d = shiftDay(now, days);
+  d.setHours(9,0,0,0);
+  return d.toISOString();
+}
+function due(p) { return dayNumber(p.nextDue) <= dayNumber(new Date()); }
+function status(p) { return due(p) ? "due" : p.interval >= 30 ? "mastered" : "learning"; }
+function dueText(p) {
+  const delta = dayNumber(p.nextDue)-dayNumber(new Date());
+  return delta < 0 ? `${-delta}d overdue` : delta === 0 ? "Due today" :
+    delta === 1 ? "Due tomorrow" : `In ${delta} days`;
+}
+function dateLabel(value) {
+  return new Date(value).toLocaleDateString(undefined,{month:"short",day:"numeric"});
+}
+function uid() {
+  return globalThis.crypto?.randomUUID?.() ||
+    `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+}
+function safeURL(value) {
+  if (!value) return "";
+  try {
+    const url = new URL(value);
+    return ["https:","http:"].includes(url.protocol) ? url.href : "";
+  } catch { return ""; }
+}
+let toastTimer;
+function toast(message) {
+  $("toast").textContent = message;
+  $("toast").classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => $("toast").classList.remove("show"),3500);
+}
+function storageWarning(message) {
+  $("storageWarning").textContent = message;
+  $("storageWarning").hidden = !message;
+}
+
+/* ---------- SM-2-style scheduler: tweak the policy here ---------- */
+/*
+  New problem: first review tomorrow.
+  Good walks the ladder 1 → 3 → 7 → 14 → 30 → 60 days.
+  Ease adjusts Good spacing modestly; Hard shortens, Easy lengthens.
+  Forgot resets both progress and interval, but preserves history.
+  After the ladder, Good uses the ease factor for continued growth.
+*/
+function scheduleReview(problem, rating, now = new Date()) {
+  if (!["Forgot","Hard","Good","Easy"].includes(rating)) {
+    throw new Error("Unknown recall rating.");
+  }
+  const ladder = [1,3,7,14,30,60];
+  let step = problem.step;
+  let ease = problem.ease;
+  let interval;
+
+  if (rating === "Forgot") {
+    step = 0;
+    ease = Math.max(1.3,ease-.2);
+    interval = 1;
+  } else if (rating === "Hard") {
+    ease = Math.max(1.3,ease-.15);
+    interval = Math.max(1,Math.round(problem.interval*.6));
+    // Re-anchor the ladder below the shortened interval.
+    step = Math.max(0,ladder.reduce((last,n,i) => n<=interval ? i : last,0));
+  } else if (rating === "Good") {
+    step = Math.min(ladder.length,step+1);
+    const base = step < ladder.length
+      ? ladder[step]
+      : Math.round(problem.interval*ease);
+    interval = Math.max(problem.interval+1,
+      Math.round(base*Math.max(.8,Math.min(1.2,ease/2.5))));
+  } else {
+    ease = Math.min(3,ease+.15);
+    step = Math.min(ladder.length,step+1);
+    const base = step < ladder.length ? ladder[step] : problem.interval*ease;
+    interval = Math.max(problem.interval+2,Math.round(base*1.4));
+  }
+
+  interval = Math.min(3650,interval);
+  ease = Math.round(ease*100)/100;
+  const nextDue = nextDate(interval,now);
+  const entry = {
+    at:now.toISOString(), rating, interval, ease, nextDue
+  };
+  return {
+    ...problem, step, ease, interval, nextDue,
+    history:[...problem.history,entry]
+  };
+}
+
+/* ---------- Sample library, persistence, and strict backup validation ---------- */
+function makeSamples() {
+  const specs = [
+    ["Two Sum","Arrays","Easy",0,-2,"Use a hash map from value to index. For each value, check whether its complement has already appeared.","O(n)","O(n)","Check before inserting so you do not reuse the same index.","two-sum"],
+    ["Longest Substring Without Repeating Characters","Strings","Medium",0,0,"Maintain a sliding window and the latest index of each character. Move the left boundary past repeated characters.","O(n)","O(k)","Never move the left boundary backwards.","longest-substring-without-repeating-characters"],
+    ["Binary Tree Level Order Traversal","Trees","Medium",1,2,"Breadth-first search with a queue. Capture the current level size before processing it.","O(n)","O(w)","Handle an empty tree. Use a queue head index instead of repeated array shifts.","binary-tree-level-order-traversal"],
+    ["Number of Islands","Graphs","Medium",2,5,"Scan the grid. Each unvisited land cell starts a flood fill; mark cells as visited when adding them to the stack.","O(rows × cols)","O(rows × cols)","Mark on discovery to prevent duplicate work.","number-of-islands"],
+    ["Coin Change","DP","Medium",0,-1,"dp[x] is the minimum number of coins for amount x. Initialize dp[0] = 0, and relax each reachable amount using every coin.","O(amount × coins)","O(amount)","Use Infinity for impossible states; return -1 if the target stays unreachable.","coin-change"],
+    ["Merge k Sorted Lists","Heap","Hard",4,18,"Push each list head into a min-heap. Repeatedly extract the smallest node and insert its successor.","O(n log k)","O(k)","Skip empty lists and maintain the tail pointer carefully.","merge-k-sorted-lists"]
+  ];
+  const ladder = [1,3,7,14,30,60];
+  return specs.map((s,i) => {
+    const [title,topic,difficulty,step,offset,approach,time,space,mistakes,slug] = s;
+    const createdAt = shiftDay(new Date(),-(8+i*5)).toISOString();
+    const history = [];
+    for (let j=0;j<step;j++) {
+      const at = shiftDay(new Date(),-(step-j)*3).toISOString();
+      history.push({at,rating:"Good",interval:ladder[j+1],ease:2.5,nextDue:nextDate(ladder[j+1],new Date(at))});
+    }
+    return {
+      id:uid(),title,topic,difficulty,
+      link:`https://leetcode.com/problems/${slug}/`,
+      notes:{approach,time,space,mistakes},createdAt,
+      interval:ladder[step],step,ease:2.5,nextDue:nextDate(offset),
+      history,sample:true
+    };
+  });
+}
+function validateBackup(raw) {
+  if (!raw || raw.version !== 1 || !Array.isArray(raw.problems) || raw.problems.length>3000) {
+    throw new Error("Expected an Orbitly v1 backup with at most 3,000 problems.");
+  }
+  const ids = new Set();
+  const str = (v,max) => typeof v==="string" && v.length<=max;
+  const validDate = v => typeof v==="string" && v.length<=40 &&
+    /^\d{4}-\d{2}-\d{2}T/.test(v) && Number.isFinite(Date.parse(v)) &&
+    new Date(v).getFullYear()>=1970 && new Date(v).getFullYear()<=9999;
+  const num = (v,min,max) => typeof v==="number" && Number.isFinite(v) && v>=min && v<=max;
+  const problems = raw.problems.map(p => {
+    if (!p || !str(p.id,100) || !p.id || ids.has(p.id) ||
+        !str(p.title,180) || !p.title.trim() || !TOPICS.includes(p.topic) ||
+        !["Easy","Medium","Hard"].includes(p.difficulty) ||
+        !str(p.link,2000) || (p.link && !safeURL(p.link)) ||
+        !validDate(p.createdAt) || !validDate(p.nextDue) ||
+        !Number.isInteger(p.interval) || !num(p.interval,1,3650) ||
+        !num(p.ease,1.3,3) || !Number.isInteger(p.step) || !num(p.step,0,6) ||
+        !p.notes || !str(p.notes.approach,20000) || !str(p.notes.mistakes,20000) ||
+        !str(p.notes.time,300) || !str(p.notes.space,300) ||
+        !Array.isArray(p.history) || p.history.length>20000) {
+      throw new Error("A problem contains invalid or unsupported data.");
+    }
+    ids.add(p.id);
+    let previousTime = -Infinity;
+    const history = p.history.map(h => {
+      if (!h || !validDate(h.at) || !validDate(h.nextDue) ||
+          !["Forgot","Hard","Good","Easy"].includes(h.rating) ||
+          !Number.isInteger(h.interval) || !num(h.interval,1,3650) ||
+          !num(h.ease,1.3,3) || Date.parse(h.at)<previousTime) {
+        throw new Error("A review-history entry is invalid.");
+      }
+      previousTime = Date.parse(h.at);
+      return {at:h.at,rating:h.rating,interval:h.interval,ease:h.ease,nextDue:h.nextDue};
+    });
+    // Reconstruct known fields only; never merge arbitrary imported properties.
+    return {
+      id:p.id,title:p.title.trim(),link:safeURL(p.link),topic:p.topic,difficulty:p.difficulty,
+      notes:{approach:p.notes.approach,time:p.notes.time,space:p.notes.space,mistakes:p.notes.mistakes},
+      createdAt:p.createdAt,nextDue:p.nextDue,interval:p.interval,ease:p.ease,step:p.step,
+      sample:p.sample===true,history
+    };
+  });
+  return {
+    version:1, problems,
+    reduced:typeof raw.reduced==="boolean" ? raw.reduced :
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+  };
+}
+function loadData() {
+  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  try {
+    const saved = localStorage.getItem(KEY);
+    if (saved !== null) return validateBackup(JSON.parse(saved));
+    return {version:1,reduced,problems:makeSamples()};
+  } catch {
+    storageWarning("Browser storage could not be read. This session is temporary; export a backup before leaving.");
+    // Do not silently replace an unreadable saved library with sample data.
+    return {version:1,reduced,problems:[]};
+  }
+}
+let data = loadData();
+let startupReadFailed = !$("storageWarning").hidden;
+function persist() {
+  try {
+    localStorage.setItem(KEY,JSON.stringify(data));
+    startupReadFailed = false;
+    storageWarning("");
+    return true;
+  } catch {
+    storageWarning("Changes are in memory only: browser storage is unavailable or full. Export a JSON backup.");
+    return false;
+  }
+}
+if (!startupReadFailed) persist();
+
+/* ---------- Application state, activity calculations, and screen rendering ---------- */
+let currentPage = "orbit";
+let selectedId = null;
+let reviewMode = false;
+let revealed = false;
+let lastCalendarDay = dayKey();
+let lastFocus = null;
+const reviewQueue = () => data.problems.filter(due).sort((a,b) =>
+  Date.parse(a.nextDue)-Date.parse(b.nextDue) || a.title.localeCompare(b.title));
+
+function activity() {
+  const counts = new Map();
+  const add = at => {
+    const key = dayKey(at);
+    counts.set(key,(counts.get(key)||0)+1);
+  };
+  data.problems.forEach(p => {
+    add(p.createdAt);
+    p.history.forEach(h => add(h.at));
+  });
+  return counts;
+}
+function currentStreak() {
+  const counts = activity();
+  let d = new Date(), result = 0;
+  if (!counts.has(dayKey(d))) d = shiftDay(d,-1);
+  while (counts.has(dayKey(d))) {
+    result++; d = shiftDay(d,-1);
+  }
+  return result;
+}
+function strength(p) {
+  if (!p.history.length) return 0;
+  const overdueDays = Math.max(0,dayNumber(new Date())-dayNumber(p.nextDue));
+  const last = p.history[p.history.length-1];
+  const recall = {Forgot:.12,Hard:.55,Good:.85,Easy:1}[last.rating];
+  return Math.round(Math.min(100,
+    (18+82*Math.min(1,Math.log2(p.interval+1)/Math.log2(61))) *
+    recall * Math.exp(-overdueDays/Math.max(3,p.interval))
+  ));
+}
+function setPage(name) {
+  if (!["orbit","today","add","stats","about"].includes(name)) return;
+  if (name==="add" && currentPage!=="add") resetForm();
+  currentPage = name;
+  ["orbit","today","add","stats","about"].forEach(p => $(p+"Page").hidden = p!==name);
+  document.querySelectorAll("nav [data-page]").forEach(b => {
+    if (b.dataset.page===name) b.setAttribute("aria-current","page");
+    else b.removeAttribute("aria-current");
+  });
+  if (name==="stats") renderStats();
+  if (name==="today") renderQueue();
+  if (name==="about") $("aboutPage").scrollTop = 0;
+  requestRender();
+}
+function filteredProblems() {
+  const query = $("search").value.trim().toLowerCase();
+  const topic = $("topicFilter").value;
+  const difficulty = $("difficultyFilter").value;
+  const state = $("statusFilter").value;
+  return data.problems.filter(p =>
+    (!topic || p.topic===topic) &&
+    (!difficulty || p.difficulty===difficulty) &&
+    (!state || status(p)===state) &&
+    (!query || [p.title,p.notes.approach,p.notes.mistakes,p.notes.time,p.notes.space]
+      .join(" ").toLowerCase().includes(query))
+  ).sort((a,b) => Date.parse(a.nextDue)-Date.parse(b.nextDue));
+}
+function renderLibrary() {
+  const problems = filteredProblems();
+  $("libraryCount").textContent = `${problems.length}/${data.problems.length}`;
+  $("problemList").innerHTML = problems.length ? problems.map(p => `
+    <button class="problem-row" data-action="open" data-id="${esc(p.id)}">
+      <span class="dot" style="--dot:${COLORS[p.topic]}"></span>
+      <span class="row-content">
+        <span class="row-title">${esc(p.title)}</span>
+        <span class="row-meta">$${esc(p.topic)} · $${p.difficulty}</span>
+      </span>
+      <span class="pill $${status(p)}">$${dueText(p)}</span>
+    </button>`).join("") : `
+    <div class="empty"><h3>${data.problems.length ? "No matching planets" : "Your universe starts here"}</h3>
+    <small>${data.problems.length ? "Try another search or filter." : "Log your first solved problem and launch it into orbit."}</small>
+    ${!data.problems.length ? '<br><button class="primary" data-action="add">Add a problem</button>' : ""}</div>`;
+  syncPlanetVisibility(problems);
+}
+function renderQueue() {
+  const queue = reviewQueue();
+  $("queueSummary").textContent = queue.length
+    ? `${queue.length} problem${queue.length===1?"":"s"} ready for a memory boost. Most overdue first.`
+    : "You're all caught up. Your next orbit is already on its way.";
+  $("todayQueue").innerHTML = queue.length ? queue.map(p => `
+    <article class="glass queue-card">
+      <span class="dot" style="--dot:${COLORS[p.topic]}"></span>
+      <div class="row-content">
+        <span class="row-title">${esc(p.title)}</span>
+        <span class="row-meta">$${esc(p.topic)} · $${p.difficulty} · <span style="color:var(--orange)">${dueText(p)}</span></span>
+      </div>
+      <button class="primary" data-action="review" data-id="${esc(p.id)}">Review</button>
+    </article>`).join("") : `
+    <div class="glass empty"><h3>Clear skies.</h3>
+    <p>No problems are due today.</p>
+    <button data-action="orbit">Explore your orbit</button>
+    <button data-action="add">Log a new problem</button></div>`;
+}
+function renderStats() {
+  const now = new Date();
+  const monday = new Date(now);
+  monday.setHours(0,0,0,0);
+  monday.setDate(monday.getDate()-((monday.getDay()+6)%7));
+  let weekly = 0;
+  data.problems.forEach(p => p.history.forEach(h => {
+    const t = Date.parse(h.at);
+    if (t>=monday.getTime() && t<=now.getTime()) weekly++;
+  }));
+  const mastered = data.problems.filter(p => status(p)==="mastered").length;
+  $("statCards").innerHTML = [
+    [currentStreak(),"day study streak"],[data.problems.length,"total solved"],
+    [weekly,"reviews this week"],[mastered,"mastered planets"]
+  ].map(([value,label])=>`<div class="glass stat"><strong>${value}</strong><span>${label}</span></div>`).join("");
+
+  const counts = activity();
+  // Start on the Monday 11 weeks before this week's Monday, so rows are Mon–Sun.
+  const start = shiftDay(now,-((now.getDay()+6)%7)-77);
+  $("heatmapRange").textContent = `${dateLabel(start)} – ${dateLabel(now)} · hover or tap a square for details`;
+  $("heatmap").innerHTML = Array.from({length:84},(_,i)=>{
+    const d = shiftDay(start,i);
+    // Days after today stay blank so the grid keeps its weekday alignment.
+    if (dayNumber(d) > dayNumber(now)) return '<div class="heat-cell" style="visibility:hidden" aria-hidden="true"></div>';
+    const key = dayKey(d), count = counts.get(key)||0;
+    const level = count===0 ? 0 : count===1 ? 1 : count<=3 ? 2 : count<=5 ? 3 : 4;
+    const label = `${key}: ${count} study event${count===1?"":"s"}`;
+    return `<div class="heat-cell" role="listitem" tabindex="0" data-level="${level}"
+      data-heat="$${esc(label)}" title="$${esc(label)}" aria-label="${esc(label)}"></div>`;
+  }).join("");
+  const topics = TOPICS.map(topic => {
+    const group = data.problems.filter(p => p.topic===topic);
+    const score = group.length ? Math.round(group.reduce((s,p)=>s+strength(p),0)/group.length) : 0;
+    return {topic,count:group.length,score};
+  }).filter(t => t.count);
+  $("topicStats").innerHTML = topics.length ? topics.map(t=>`
+    <div class="topic-row">
+      <div class="topic-line"><span>$${esc(t.topic)} <small>· $${t.count} problem$${t.count===1?"":"s"}</small></span><span>$${t.score}%</span></div>
+      <div class="bar" style="--dot:$${COLORS[t.topic]}"><i style="width:$${t.score}%"></i></div>
+    </div>`).join("") : '<div class="empty">Log and review problems to build your topic signals.</div>';
+}
+function renderAll() {
+  const count = reviewQueue().length;
+  $("dueCount").textContent = count;
+  $("todayBadge").textContent = count || "";
+  $("streakPill").textContent = `${currentStreak()} day streak`;
+  $("sampleInfo").textContent = `${data.problems.filter(p=>p.sample).length} sample problems remain. Sample activity is included in stats.`;
+  $("clearSamples").disabled = !data.problems.some(p=>p.sample);
+  renderLibrary();
+  renderQueue();
+  if (currentPage==="stats") renderStats();
+}
+
+/* ---------- Problem forms and accessible detail / review dialogs ---------- */
+TOPICS.forEach(topic => {
+  $("topicInput").add(new Option(topic,topic));
+  $("topicFilter").add(new Option(topic,topic));
+});
+function resetForm() {
+  $("problemForm").reset();
+  $("editId").value = "";
+  $("formTitle").textContent = "Launch a problem.";
+  $("saveProblem").textContent = "Launch into orbit";
+  $("cancelEdit").hidden = true;
+}
+function openDialog(id) {
+  lastFocus = document.activeElement;
+  $(id).showModal();
+}
+function closeDialog(id) {
+  $(id).close();
+}
+$("problemDialog").addEventListener("close",()=>{
+  selectedId = null;
+  // Only restore focus if nothing else (e.g. the edit form's title box) has claimed it.
+  if (lastFocus?.isConnected && lastFocus.offsetParent !== null &&
+      document.activeElement === document.body) {
+    lastFocus.focus({preventScroll:true});
+  }
+  requestRender();
+});
+function openProblem(id, asReview = false) {
+  const p = data.problems.find(p=>p.id===id);
+  if (!p) return;
+  selectedId = id;
+  reviewMode = asReview;
+  revealed = false;
+  renderDetail();
+  if (!$("problemDialog").open) openDialog("problemDialog");
+}
+function renderDetail() {
+  const p = data.problems.find(p=>p.id===selectedId);
+  if (!p) return;
+  $("detailTitle").textContent = p.title;
+  const notes = `
+    <div class="note-block"><h3>Approach</h3><p>${esc(p.notes.approach || "No approach notes yet. Edit this problem to add them.")}</p></div>
+    <div class="note-block"><h3>Complexity</h3><p>Time: $${esc(p.notes.time || "Not recorded")} · Space: $${esc(p.notes.space || "Not recorded")}</p></div>
+    <div class="note-block"><h3>Mistakes / watch-outs</h3><p>${esc(p.notes.mistakes || "No mistakes recorded.")}</p></div>`;
+  $("detailBody").innerHTML = `
+    <div class="detail-meta">
+      <span class="pill" style="color:$${COLORS[p.topic]}">$${esc(p.topic)}</span>
+      <span class="pill">${p.difficulty}</span>
+      <span class="pill $${status(p)}">$${dueText(p)}</span>
+    </div>
+    <p class="muted" style="font-size:12px">Interval: $${p.interval}d · Ease: $${p.ease.toFixed(2)} · ${p.history.length} reviews</p>
+    ${p.link ? `<p><a href="${esc(p.link)}" target="_blank" rel="noopener noreferrer">Open original problem ↗</a></p>` : ""}
+    ${reviewMode ? '<p class="muted" style="font-size:13px">Recall the approach and complexity before revealing your notes.</p>' : ""}
+    ${revealed ? notes : '<button id="revealButton" data-action="reveal">Reveal approach</button>'}
+    ${reviewMode ? `
+      <div class="rating-grid">
+      ${["Forgot","Hard","Good","Easy"].map(r=>{
+        const preview = scheduleReview(p,r);
+        return `<button data-action="rate" data-rating="$${r}" $${revealed?"":"disabled"}>
+          $${r}<small>$${preview.interval} day${preview.interval===1?"":"s"}</small></button>`;
+      }).join("")}
+      </div><p class="review-hint">${revealed ? "Rate what you recalled before reading the notes." : "Reveal your approach to unlock recall ratings."}</p>
+    ` : `<div class="detail-actions"><button class="primary" data-action="begin-review">Review ${due(p)?"now":"early"}</button></div>`}
+    <div class="detail-actions">
+      <button data-action="edit">Edit problem</button>
+      <button class="danger" data-action="delete">Delete</button>
+    </div>
+    <details style="margin-top:20px">
+      <summary class="muted" style="font-size:12px;cursor:pointer">Review history (${p.history.length})</summary>
+      $${p.history.length ? `<ol class="history">$${[...p.history].reverse().map(h=>
+        `<li>${esc(new Date(h.at).toLocaleString())} · ${h.rating} → ${h.interval}d</li>`
+      ).join("")}</ol>` : '<p class="muted" style="font-size:12px;margin-top:10px">No reviews yet. Your first mission awaits.</p>'}
+    </details>`;
+}
+function editProblem(id) {
+  const p = data.problems.find(p=>p.id===id);
+  if (!p) return;
+  closeDialog("problemDialog");
+  setPage("add");
+  $("editId").value = p.id;
+  $("titleInput").value = p.title;
+  $("linkInput").value = p.link;
+  $("topicInput").value = p.topic;
+  $("difficultyInput").value = p.difficulty;
+  ["approach","time","space","mistakes"].forEach(k => $(k+"Input").value = p.notes[k]);
+  $("formTitle").textContent = "Refine your planet.";
+  $("saveProblem").textContent = "Save changes";
+  $("cancelEdit").hidden = false;
+  $("titleInput").focus();
+}
+$("problemForm").addEventListener("submit",event=>{
+  event.preventDefault();
+  const title = $("titleInput").value.trim();
+  const link = $("linkInput").value.trim();
+  if (!title) { toast("Give your problem a title."); return; }
+    if (link && !safeURL(link)) { toast("Use a valid http:// or https:// problem link."); return; }
+  const id = $("editId").value;
+  const fields = {
+    title,link:safeURL(link),topic:$("topicInput").value,difficulty:$("difficultyInput").value,
+    notes:Object.fromEntries(["approach","time","space","mistakes"].map(k=>[k,$(k+"Input").value.trim()]))
+  };
+  if (id) {
+    const index = data.problems.findIndex(p=>p.id===id);
+    if (index<0) { toast("This problem no longer exists."); return; }
+    data.problems[index] = {...data.problems[index],...fields};
+  } else {
+    if (data.problems.length>=3000) { toast("The library limit is 3,000 problems."); return; }
+    data.problems.push({
+      id:uid(),...fields,createdAt:new Date().toISOString(),
+      nextDue:nextDate(1),interval:1,ease:2.5,step:0,history:[],sample:false
+    });
+  }
+  persist(); syncPlanets(); renderAll(); resetForm(); setPage("orbit");
+  toast(id ? "Planet updated." : "Launched. Your first review is tomorrow.");
+});
+function completeReview(rating) {
+  if (!revealed || !selectedId) return;
+  const index = data.problems.findIndex(p=>p.id===selectedId);
+  if (index<0) return;
+  const old = data.problems[index];
+  const oldStreak = currentStreak();
+  const point = getPlanetPosition(old.id);
+  const updated = scheduleReview(old,rating);
+  data.problems[index] = updated;
+  persist();
+  closeDialog("problemDialog");
+  syncPlanets(); renderAll();
+  if (point) burst(point,COLORS[old.topic],36);
+  const streak = currentStreak();
+  if (streak>oldStreak && [3,7,14,30,60,100,180,365].includes(streak)) {
+    fireworks();
+    toast(`${streak}-day streak! Stellar consistency.`);
+  } else {
+    toast(`${rating==="Forgot"?"Reset and regroup":"Review complete"} · next review in ${updated.interval} day${updated.interval===1?"":"s"}.`);
+  }
+  if (reviewMode) setPage("today");
+}
+
+/* ---------- Event delegation and backup controls ---------- */
+document.addEventListener("click",event=>{
+  const close = event.target.closest("[data-close]");
+  if (close) { closeDialog(close.dataset.close); return; }
+  const nav = event.target.closest("[data-page]");
+  if (nav) { setPage(nav.dataset.page); return; }
+  const b = event.target.closest("[data-action]");
+  if (!b) return;
+  const action = b.dataset.action;
+  if (action==="open" || action==="review") {
+    focusPlanet(b.dataset.id);
+    openProblem(b.dataset.id,action==="review");
+  } else if (action==="add" || action==="orbit" || action==="about") setPage(action);
+  else if (action==="reveal") {
+    revealed = true; renderDetail();
+    $("detailBody").querySelector("[data-rating]")?.focus({preventScroll:true});
+  } else if (action==="begin-review") {
+    reviewMode = true; revealed = false; renderDetail();
+    $("revealButton").focus();
+  } else if (action==="rate") completeReview(b.dataset.rating);
+  else if (action==="edit") editProblem(selectedId);
+  else if (action==="delete") {
+    const p = data.problems.find(p=>p.id===selectedId);
+    if (!p || !confirm(`Delete "${p.title}" and its review history?`)) return;
+    data.problems = data.problems.filter(p=>p.id!==selectedId);
+    closeDialog("problemDialog");
+    persist(); syncPlanets(); renderAll(); toast("Planet removed.");
+  }
+});
+$("brandButton").onclick = ()=>setPage("orbit");
+$("settingsButton").onclick = ()=>openDialog("settingsDialog");
+$("startReview").onclick = ()=>{
+  const first = reviewQueue()[0];
+  setPage("today");
+  if (first) { focusPlanet(first.id); openProblem(first.id,true); }
+};
+$("cancelEdit").onclick = ()=>{ resetForm(); setPage("orbit"); };
+$("filterToggle").onclick = ()=>{
+  const open = $("filterArea").hidden;
+  $("filterArea").hidden = !open;
+  $("filterToggle").setAttribute("aria-expanded",String(open));
+  $("orbitLibrary").style.maxHeight = open ? "65%" : "";
+  if (open) $("search").focus();
+};
+["search","topicFilter","difficultyFilter","statusFilter"].forEach(id=>{
+  $(id).addEventListener(id==="search"?"input":"change",renderLibrary);
+});
+$("heatmap").addEventListener("click",e=>{
+  const cell=e.target.closest("[data-heat]");
+  if (cell) toast(cell.dataset.heat);
+});
+$("heatmap").addEventListener("keydown",e=>{
+  if (e.key==="Enter" || e.key===" ") {
+    const cell=e.target.closest("[data-heat]");
+    if (cell) { e.preventDefault(); toast(cell.dataset.heat); }
+  }
+});
+$("exportButton").onclick = ()=>{
+  try {
+    const payload = {...data,exportedAt:new Date().toISOString()};
+    const blob = new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = `orbitly-${dayKey()}.json`;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),10000);
+    toast("Backup exported.");
+  } catch { toast("Export failed. Please try again."); }
+};
+$("importButton").onclick = ()=>$("importFile").click();
+$("importFile").addEventListener("change",async event=>{
+  const file = event.target.files[0];
+  event.target.value = "";
+  if (!file) return;
+  if (file.size>15*1024*1024) { toast("Choose a JSON backup smaller than 15 MB."); return; }
+  try {
+    const candidate = validateBackup(JSON.parse(await file.text()));
+    if (!confirm(`Replace your entire current library with ${candidate.problems.length} imported problems? Export a backup first if needed.`)) return;
+    data = candidate;
+    persist(); applyMotion(); syncPlanets(); renderAll(); resetForm();
+    toast("Backup imported successfully.");
+  } catch (err) {
+    toast(`Import rejected: ${err.message || "Invalid JSON file."}`);
+  }
+});
+$("clearSamples").onclick = ()=>{
+  if (!confirm("Remove sample problems and their sample activity? Your own problems will stay.")) return;
+  data.problems = data.problems.filter(p=>!p.sample);
+  persist(); syncPlanets(); renderAll(); toast("Sample planets cleared.");
+};
+$("reducedMotion").onchange = ()=>{
+  data.reduced = $("reducedMotion").checked;
+  persist(); applyMotion();
+};
+function applyMotion() {
+  document.body.classList.toggle("reduced",data.reduced);
+  $("reducedMotion").checked = data.reduced;
+  if (data.reduced) clearBursts();
+  requestRender();
+}
+
+/* ---------- First-launch welcome card (remembered in storage, try/catch wrapped) ---------- */
+function welcomeDismissed() {
+  try { return localStorage.getItem(WELCOME_KEY) === "1"; }
+  catch { return false; }
+}
+function rememberWelcomeDismissed() {
+  try { localStorage.setItem(WELCOME_KEY,"1"); }
+  catch { /* Storage unavailable: the card may reappear on the next launch. */ }
+}
+function setupWelcome() {
+  const card = $("welcomeCard");
+  const show = !welcomeDismissed();
+  card.hidden = !show;
+  $("orbitPage").classList.toggle("has-welcome",show);
+  const hide = () => {
+    card.hidden = true;
+    $("orbitPage").classList.remove("has-welcome");
+    rememberWelcomeDismissed();
+    requestRender();
+  };
+  $("welcomeDismiss").onclick = hide;
+  card.querySelector('[data-action="about"]').onclick = () => {
+    hide();
+    setPage("about");
+  };
+}
+
+/* ---------- About page: topic color swatches ---------- */
+function renderSwatches() {
+  $("topicSwatches").innerHTML = TOPICS.map(t =>
+    `<span class="swatch"><i style="background:${COLORS[t]};box-shadow:0 0 10px ${COLORS[t]}"></i>${esc(t)}</span>`
+  ).join("");
+}
+
+/* ---------- Three.js universe: shared geometry, glow sprites, custom touch controls ---------- */
+let renderer,scene,camera,sun,corona,starfield,dust,glowTexture;
+let ready3D = false;
+let raf = 0,lastFrame = 0,simTime = 0,forceUntil = 0;
+let theta = .35,phi = .66,distance = 37;
+let desiredTheta = theta,desiredPhi = phi,desiredDistance = distance;
+let target,desiredTarget,raycaster,ndc;
+let sphereGeometry,ringGeometry;
+const planets = new Map();
+const bursts = [];
+const pointers = new Map();
+let gesture = null;
+let dragMoved = false;
+let initialPinch = 0;
+let initialDistance = 0;
+let lastTapBlocked = false;
+
+function createGlowTexture() {
+  const c = document.createElement("canvas");
+  c.width = c.height = 128;
+  const ctx = c.getContext("2d");
+  const gradient = ctx.createRadialGradient(64,64,0,64,64,64);
+  gradient.addColorStop(0,"rgba(255,255,255,1)");
+  gradient.addColorStop(.15,"rgba(255,255,255,.8)");
+  gradient.addColorStop(.38,"rgba(255,255,255,.22)");
+  gradient.addColorStop(1,"rgba(255,255,255,0)");
+  ctx.fillStyle = gradient; ctx.fillRect(0,0,128,128);
+  return new THREE.CanvasTexture(c);
+}
+function glow(color,scale,opacity=1) {
+  const sprite = new THREE.Sprite(new THREE.SpriteMaterial({
+    map:glowTexture,color,transparent:true,opacity,
+    blending:THREE.AdditiveBlending,depthWrite:false
+  }));
+  sprite.scale.set(scale,scale,1);
+  return sprite;
+}
+function makePointCloud(count,radius,size,color) {
+  const positions = new Float32Array(count*3);
+  for (let i=0;i<count;i++) {
+    const u = Math.random()*Math.PI*2, v = Math.acos(2*Math.random()-1);
+    const r = radius*(.6+Math.random()*.4);
+    positions[i*3] = Math.sin(v)*Math.cos(u)*r;
+    positions[i*3+1] = Math.cos(v)*r;
+    positions[i*3+2] = Math.sin(v)*Math.sin(u)*r;
+  }
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute("position",new THREE.BufferAttribute(positions,3));
+  return new THREE.Points(geometry,new THREE.PointsMaterial({
+    color,size,transparent:true,opacity:.75,depthWrite:false,
+    sizeAttenuation:true,map:glowTexture,blending:THREE.AdditiveBlending
+  }));
+}
+function init3D() {
+  try {
+    if (!window.THREE) throw new Error("Three.js unavailable");
+    renderer = new THREE.WebGLRenderer({
+      canvas:$("space"),alpha:true,antialias:window.devicePixelRatio<2,
+      powerPreference:"high-performance"
+    });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+    renderer.setSize(innerWidth,innerHeight);
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.35;
+
+    scene = new THREE.Scene();
+    camera = new THREE.PerspectiveCamera(48,innerWidth/innerHeight,.1,350);
+    target = new THREE.Vector3();
+    desiredTarget = new THREE.Vector3();
+    raycaster = new THREE.Raycaster();
+    ndc = new THREE.Vector2();
+    glowTexture = createGlowTexture();
+    sphereGeometry = new THREE.SphereGeometry(1,24,18);
+    const ringPoints=[];
+    for(let i=0;i<=120;i++) {
+      const a=i/120*Math.PI*2;
+      ringPoints.push(new THREE.Vector3(Math.cos(a),0,Math.sin(a)*.73));
+    }
+    ringGeometry = new THREE.BufferGeometry().setFromPoints(ringPoints);
+    scene.add(new THREE.AmbientLight(0x809aff,1.8));
+    const sunLight = new THREE.PointLight(0xffc37e,100,90,1.3);
+    scene.add(sunLight);
+    const rim = new THREE.DirectionalLight(0x8faaff,2);
+    rim.position.set(-10,15,-10); scene.add(rim);
+
+    sun = new THREE.Mesh(sphereGeometry,new THREE.MeshBasicMaterial({color:0xffdf9d}));
+    sun.scale.setScalar(1.55); scene.add(sun);
+    corona = glow(0xff9842,10,.8); scene.add(corona);
+    const core = glow(0xffd98a,5,.8); sun.add(core); core.scale.set(3.3,3.3,1);
+
+    starfield = makePointCloud(innerWidth<760?650:1100,140,.27,0xc2d6ff);
+    scene.add(starfield);
+    dust = makePointCloud(95,43,.12,0x9daaff); scene.add(dust);
+    ready3D = true;
+    syncPlanets();
+    installControls();
+    requestRender();
+  } catch {
+    ready3D = false;
+    $("sceneError").hidden = false;
+    renderer?.dispose();
+  }
+}
+function orbitRadius(p) {
+  if (due(p)) return 4.4 + Math.min(1.2,Math.max(0,dayNumber(new Date())-dayNumber(p.nextDue))*.06);
+  const days = Math.max(1,dayNumber(p.nextDue)-dayNumber(new Date()));
+  return 6.5 + Math.min(15,Math.log2(days+1)*2.25);
+}
+function hashId(id) {
+  let h = 0;
+  for (let i=0;i<id.length;i++) h = (h*31+id.charCodeAt(i))>>>0;
+  return h;
+}
+function syncPlanets() {
+  if (!ready3D) return;
+  const live = new Set(data.problems.map(p=>p.id));
+  planets.forEach((obj,id)=>{
+    if (!live.has(id)) {
+      scene.remove(obj.root,obj.orbit);
+      obj.mesh.material.dispose();
+      obj.hit.material.dispose();
+      obj.aura.material.dispose();
+      obj.orbit.material.dispose();
+      if (obj.band) obj.band.material.dispose();
+      planets.delete(id);
+    }
+  });
+  data.problems.forEach(p=>{
+    let obj = planets.get(p.id);
+    const size = {Easy:.35,Medium:.48,Hard:.65}[p.difficulty];
+    const hash = hashId(p.id);
+    if (!obj) {
+      const root = new THREE.Group();
+      const mesh = new THREE.Mesh(sphereGeometry,new THREE.MeshStandardMaterial({
+        color:COLORS[p.topic],roughness:.65,metalness:.25,
+        emissive:COLORS[p.topic],emissiveIntensity:.18
+      }));
+      mesh.userData.id = p.id;
+      root.add(mesh);
+      // Invisible, larger sphere that makes planets easier to tap on touch screens.
+      const hit = new THREE.Mesh(sphereGeometry,new THREE.MeshBasicMaterial({visible:false}));
+      hit.userData.id = p.id;
+      root.add(hit);
+      const aura = glow(COLORS[p.topic],size*5,.4); root.add(aura);
+      const orbit = new THREE.Line(ringGeometry,new THREE.LineBasicMaterial({
+        color:COLORS[p.topic],transparent:true,opacity:.12,depthWrite:false
+      }));
+      orbit.rotation.y = (hash%100)/100*Math.PI;
+      orbit.rotation.z = ((hash%9)-4)*.018;
+      scene.add(root,orbit);
+      obj = {root,mesh,hit,aura,orbit,radius:orbitRadius(p),desiredRadius:orbitRadius(p),
+        phase:(hash%6283)/1000,speed:.06+(hash%40)/1000,band:null,p};
+      planets.set(p.id,obj);
+    }
+    obj.p = p;
+    obj.desiredRadius = orbitRadius(p);
+    obj.mesh.scale.setScalar(size);
+    obj.hit.scale.setScalar(size*2.6);
+    obj.mesh.material.color.set(COLORS[p.topic]);
+    obj.mesh.material.emissive.set(COLORS[p.topic]);
+    obj.aura.material.color.set(due(p)?0xff783e:COLORS[p.topic]);
+    obj.aura.scale.setScalar(size*(due(p)?7:4.2));
+    obj.aura.material.opacity = due(p)?.75:.3;
+    obj.orbit.material.color.set(COLORS[p.topic]);
+    if (p.difficulty==="Hard" && !obj.band) {
+      obj.band = new THREE.Line(ringGeometry,new THREE.LineBasicMaterial({
+        color:COLORS[p.topic],transparent:true,opacity:.7
+      }));
+      obj.band.scale.setScalar(size*1.8);
+      obj.band.rotation.z=.45;
+      obj.root.add(obj.band);
+    } else if (p.difficulty!=="Hard" && obj.band) {
+      obj.root.remove(obj.band); obj.band.material.dispose(); obj.band=null;
+    }
+  });
+  syncPlanetVisibility(filteredProblems());
+  requestRender();
+}
+function syncPlanetVisibility(list) {
+  if (!ready3D) return;
+  const ids = new Set(list.map(p=>p.id));
+  planets.forEach((obj,id)=>{
+    obj.root.visible=ids.has(id); obj.orbit.visible=ids.has(id);
+  });
+  requestRender();
+}
+function getPlanetPosition(id) {
+  return planets.get(id)?.root.position.clone() || null;
+}
+function focusPlanet(id) {
+  if (!ready3D) return;
+  const obj=planets.get(id);
+  if (!obj) return;
+  desiredTarget.copy(obj.root.position);
+  desiredDistance=9;
+  desiredPhi=.9;
+  if (data.reduced) {
+    target.copy(desiredTarget); distance=desiredDistance; phi=desiredPhi;
+  }
+  requestRender(1600);
+}
+function resetCamera() {
+  if (!ready3D) return;
+  desiredTarget.set(0,0,0); desiredDistance=37; desiredTheta=.35; desiredPhi=.66;
+  if (data.reduced) {
+    target.copy(desiredTarget); distance=desiredDistance; theta=desiredTheta; phi=desiredPhi;
+  }
+  requestRender(1500);
+}
+$("resetCamera").onclick=resetCamera;
+
+function installControls() {
+  const canvas=$("space");
+  function pinchDistance() {
+    const a=[...pointers.values()];
+    return a.length>=2 ? Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y) : 0;
+  }
+  canvas.addEventListener("pointerdown",e=>{
+    if (currentPage!=="orbit") return;
+    canvas.setPointerCapture(e.pointerId);
+    pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    if (pointers.size===1) {
+      gesture={x:e.clientX,y:e.clientY,startX:e.clientX,startY:e.clientY,time:performance.now()};
+      dragMoved=false; lastTapBlocked=false;
+    } else {
+      lastTapBlocked=true; dragMoved=true;
+      initialPinch=pinchDistance(); initialDistance=desiredDistance;
+    }
+  });
+  canvas.addEventListener("pointermove",e=>{
+    if (!pointers.has(e.pointerId)) return;
+    const previous=pointers.get(e.pointerId);
+    pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    if (pointers.size>=2) {
+      const separation=pinchDistance();
+      if (separation && initialPinch) desiredDistance=Math.max(5,Math.min(80,initialDistance*initialPinch/separation));
+    } else if (gesture) {
+      if (Math.hypot(e.clientX-gesture.startX,e.clientY-gesture.startY)>6) dragMoved=true;
+      desiredTheta-=(e.clientX-previous.x)*.007;
+      desiredPhi=Math.max(.18,Math.min(1.42,desiredPhi+(e.clientY-previous.y)*.005));
+    }
+    if (data.reduced) { theta=desiredTheta; phi=desiredPhi; distance=desiredDistance; }
+    requestRender(300);
+  });
+  function release(e,cancelled=false) {
+    if (!pointers.has(e.pointerId)) return;
+    const isTap=!cancelled && !dragMoved && !lastTapBlocked &&
+      pointers.size===1 && gesture && performance.now()-gesture.time<650;
+    pointers.delete(e.pointerId);
+    if (isTap) pickPlanet(e.clientX,e.clientY);
+    if (pointers.size<2) initialPinch=0;
+    if (!pointers.size) gesture=null;
+  }
+  canvas.addEventListener("pointerup",e=>release(e));
+  canvas.addEventListener("pointercancel",e=>release(e,true));
+  canvas.addEventListener("lostpointercapture",e=>{ pointers.delete(e.pointerId); if (!pointers.size) gesture=null; });
+  canvas.addEventListener("wheel",e=>{
+    if (currentPage!=="orbit") return;
+    e.preventDefault();
+    desiredDistance=Math.max(5,Math.min(80,desiredDistance*Math.exp(e.deltaY*.001)));
+    if (data.reduced) distance=desiredDistance;
+    requestRender(400);
+  },{passive:false});
+}
+function pickPlanet(x,y) {
+  if (!ready3D) return;
+  ndc.set(x/innerWidth*2-1,-y/innerHeight*2+1);
+  raycaster.setFromCamera(ndc,camera);
+  const candidates=[...planets.values()].filter(o=>o.root.visible).map(o=>o.hit);
+  const hit=raycaster.intersectObjects(candidates,false)[0];
+  if (hit) {
+    focusPlanet(hit.object.userData.id);
+    openProblem(hit.object.userData.id,false);
+  }
+}
+
+/* ---------- Bounded review particles and streak fireworks ---------- */
+function burst(position,color,count=36) {
+  if (!ready3D || data.reduced) return;
+  while(bursts.length>=5) disposeBurst(bursts.shift());
+  const vertices=new Float32Array(count*3),velocity=new Float32Array(count*3);
+  for(let i=0;i<count;i++) {
+    velocity[i*3]=(Math.random()-.5)*5;
+    velocity[i*3+1]=(Math.random()-.25)*5;
+    velocity[i*3+2]=(Math.random()-.5)*5;
+  }
+  const geo=new THREE.BufferGeometry();
+  geo.setAttribute("position",new THREE.BufferAttribute(vertices,3));
+  const mat=new THREE.PointsMaterial({
+    color,size:.24,map:glowTexture,transparent:true,opacity:1,
+    blending:THREE.AdditiveBlending,depthWrite:false
+  });
+  const points=new THREE.Points(geo,mat);
+  points.position.copy(position);
+  points.frustumCulled=false;
+  scene.add(points);
+  bursts.push({points,velocity,age:0});
+  requestRender(1700);
+}
+function disposeBurst(b) {
+  scene.remove(b.points); b.points.geometry.dispose(); b.points.material.dispose();
+}
+function clearBursts() {
+  while(bursts.length) disposeBurst(bursts.pop());
+}
+function fireworks() {
+  if (!ready3D || data.reduced) return;
+  ["#67e8f9","#fa83c9","#ffcf7d"].forEach((color,i)=>{
+    burst(new THREE.Vector3((i-1)*5,5+i,0),color,44);
+  });
+}
+
+/* ---------- Adaptive render loop: hidden-tab pause and static reduced motion ---------- */
+function requestRender(duration=0) {
+  if (!ready3D || document.hidden) return;
+  forceUntil=Math.max(forceUntil,performance.now()+duration);
+  if (!raf) raf=requestAnimationFrame(frame);
+}
+function frame(now) {
+  raf=0;
+  if (!ready3D || document.hidden) return;
+  const dt=lastFrame ? Math.min(.05,(now-lastFrame)/1000) : .016;
+  lastFrame=now;
+  if (!data.reduced) simTime+=dt;
+  const smooth=data.reduced?1:1-Math.exp(-dt*7);
+  theta+=(desiredTheta-theta)*smooth;
+  phi+=(desiredPhi-phi)*smooth;
+  distance+=(desiredDistance-distance)*smooth;
+  target.lerp(desiredTarget,smooth);
+  camera.position.set(
+    target.x+distance*Math.sin(phi)*Math.sin(theta),
+    target.y+distance*Math.cos(phi),
+    target.z+distance*Math.sin(phi)*Math.cos(theta)
+  );
+  camera.lookAt(target);
+  camera.updateMatrixWorld();
+
+  sun.scale.setScalar(1.55+(data.reduced?0:Math.sin(simTime*1.5)*.045));
+  corona.material.opacity=data.reduced?.7:.7+Math.sin(simTime*1.3)*.09;
+  starfield.rotation.y=theta*.018+simTime*.001;
+  starfield.rotation.x=phi*.012;
+  dust.rotation.y=simTime*.012;
+
+  planets.forEach(obj=>{
+    obj.radius+=(obj.desiredRadius-obj.radius)*smooth;
+    const a=obj.phase+simTime*obj.speed;
+    const v=new THREE.Vector3(Math.cos(a)*obj.radius,0,Math.sin(a)*obj.radius*.73);
+    v.applyEuler(obj.orbit.rotation);
+    obj.root.position.copy(v);
+    obj.orbit.scale.setScalar(obj.radius);
+    if (!data.reduced) obj.mesh.rotation.y+=dt*.17;
+    if (due(obj.p)) obj.aura.material.opacity=data.reduced?.65:.5+Math.sin(simTime*3+obj.phase)*.22;
+  });
+  for(let i=bursts.length-1;i>=0;i--) {
+    const b=bursts[i]; b.age+=dt;
+    const positions=b.points.geometry.attributes.position;
+    for(let j=0;j<positions.count;j++) {
+      positions.array[j*3]+=b.velocity[j*3]*dt;
+      positions.array[j*3+1]+=b.velocity[j*3+1]*dt;
+      positions.array[j*3+2]+=b.velocity[j*3+2]*dt;
+      b.velocity[j*3+1]-=dt*1.1;
+    }
+    positions.needsUpdate=true;
+    b.points.material.opacity=Math.max(0,1-b.age/1.5);
+    if(b.age>=1.5) { disposeBurst(b); bursts.splice(i,1); }
+  }
+  renderer.render(scene,camera);
+  const settling=target.distanceTo(desiredTarget)>.005 ||
+    Math.abs(distance-desiredDistance)>.005 ||
+    Math.abs(theta-desiredTheta)>.001 || Math.abs(phi-desiredPhi)>.001 ||
+    [...planets.values()].some(o=>Math.abs(o.radius-o.desiredRadius)>.005);
+  if (!data.reduced || settling || bursts.length || now<forceUntil) {
+    raf=requestAnimationFrame(frame);
+  }
+}
+document.addEventListener("visibilitychange",()=>{
+  if (document.hidden) {
+    if (raf) cancelAnimationFrame(raf);
+    raf=0; lastFrame=0;
+    pointers.clear(); gesture=null;
+  } else {
+    refreshCalendar();
+    requestRender();
+  }
+});
+window.addEventListener("resize",()=>{
+  if (!ready3D) return;
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+  renderer.setSize(innerWidth,innerHeight);
+  camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix();
+  requestRender();
+});
+function refreshCalendar() {
+  if (dayKey()!==lastCalendarDay) {
+    lastCalendarDay=dayKey();
+    syncPlanets(); renderAll();
+    if ($("problemDialog").open) renderDetail();
+  }
+}
+setInterval(()=>{ if (!document.hidden) refreshCalendar(); },30000);
+window.addEventListener("focus",refreshCalendar);
+
+// Multi-tab synchronization: a saved library in another tab becomes authoritative.
+window.addEventListener("storage",event=>{
+  if (event.key!==KEY || !event.newValue) return;
+  try {
+    const updated=validateBackup(JSON.parse(event.newValue));
+    if ($("problemDialog").open) closeDialog("problemDialog");
+    data=updated;
+    applyMotion(); syncPlanets(); renderAll();
+    toast("Library updated from another tab.");
+  } catch { toast("Another tab saved unreadable data; this session was left unchanged."); }
+});
+
+/* ---------- Boot ---------- */
+init3D();
+applyMotion();
+renderSwatches();
+setupWelcome();
+renderAll();
+</script>
+</body>
+</html>
